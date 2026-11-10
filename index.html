@@ -117,22 +117,27 @@ function updateAccountUI(){
  $("logoutButton").hidden=!logged;
 }
 async function refreshSession(){
- if(!db){updateAccountUI();return;}
- try{
-  db.auth.onAuthStateChange((_event,session)=>{
-   currentUser=session?.user||null;
-   updateAccountUI();
-  });
-  const {data,error}=await db.auth.getSession();
-  if(error)throw error;
-  currentUser=data.session?.user||null;
-  updateAccountUI();
- }catch(error){
-  console.error("No se pudo comprobar la sesión:",error);
+ if(!db){
   currentUser=null;
   updateAccountUI();
+  return;
  }
-}
+
+ const {data,error}=await db.auth.getSession();
+
+ if(error){
+  console.error(error);
+  return;
+ }
+
+ currentUser=data.session?.user||null;
+ updateAccountUI();
+
+ db.auth.onAuthStateChange((_event,session)=>{
+  currentUser=session?.user||null;
+  updateAccountUI();
+ });
+  }
 async function submitAuth(event){
  event.preventDefault();
  if(!db){showMessage("authMessage","Configura primero la URL y la clave pública de Supabase en este archivo.",true);return;}
